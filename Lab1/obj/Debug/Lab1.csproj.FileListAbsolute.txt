@@ -1,0 +1,15 @@
+C:\Users\innok\source\repos\Lab1\Lab1\bin\Debug\Lab1.exe.config
+C:\Users\innok\source\repos\Lab1\Lab1\bin\Debug\Lab1.exe
+C:\Users\innok\source\repos\Lab1\Lab1\bin\Debug\Lab1.pdb
+C:\Users\innok\source\repos\Lab1\Lab1\bin\Debug\Db4objects.Db4o.Data.Services.dll
+C:\Users\innok\source\repos\Lab1\Lab1\bin\Debug\Db4objects.Db4o.dll
+C:\Users\innok\source\repos\Lab1\Lab1\bin\Debug\Db4objects.Db4o.Linq.dll
+C:\Users\innok\source\repos\Lab1\Lab1\bin\Debug\Mono.Reflection.dll
+C:\Users\innok\source\repos\Lab1\Lab1\bin\Debug\Db4objects.Db4o.xml
+C:\Users\innok\source\repos\Lab1\Lab1\obj\Debug\Lab1.csprojAssemblyReference.cache
+C:\Users\innok\source\repos\Lab1\Lab1\obj\Debug\Lab1.Form1.resources
+C:\Users\innok\source\repos\Lab1\Lab1\obj\Debug\Lab1.Properties.Resources.resources
+C:\Users\innok\source\repos\Lab1\Lab1\obj\Debug\Lab1.csproj.GenerateResource.cache
+C:\Users\innok\source\repos\Lab1\Lab1\obj\Debug\Lab1.csproj.CopyComplete
+C:\Users\innok\source\repos\Lab1\Lab1\obj\Debug\Lab1.exe
+C:\Users\innok\source\repos\Lab1\Lab1\obj\Debug\Lab1.pdb
