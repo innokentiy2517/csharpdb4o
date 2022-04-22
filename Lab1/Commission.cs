@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace Lab1
 {
-    class Commission
+    public class Commission
     {
         private string _commissionName;
 

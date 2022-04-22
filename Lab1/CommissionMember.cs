@@ -9,7 +9,7 @@ using Db4objects.Db4o.Query;
 
 namespace Lab1
 {
-    class CommissionMember
+    public class CommissionMember
     {
         private Person person;
         private Commission commission;

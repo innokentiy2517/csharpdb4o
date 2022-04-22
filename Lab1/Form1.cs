@@ -307,6 +307,22 @@ namespace Lab1
         private void openParticipantsForm(object sender, MouseEventArgs e)
         {
             string commissionName = sessionGV.CurrentRow.Cells[0].Value.ToString();
+            DateTime date = Convert.ToDateTime(sessionGV.CurrentRow.Cells[1].Value.ToString());
+            string place = sessionGV.CurrentRow.Cells[2].Value.ToString();
+            Commission commissionProto = new Commission(commissionName);
+            Form p;
+            Session sessionProto;
+            using (IObjectContainer db = Db4oEmbedded.OpenFile(dbName))
+            {
+                IObjectSet commissionSet = db.QueryByExample(commissionProto);
+                Commission commissionRes = (Commission)commissionSet.Next();
+                sessionProto = new Session(commissionRes, date, place);
+                IObjectSet sessionSet = db.QueryByExample(sessionProto);
+                // Session sessionRes = (Session)sessionSet.Next();
+                db.Close();
+            }
+            p = new Participants(sessionProto);
+            p.Show();
         }
     }
 }

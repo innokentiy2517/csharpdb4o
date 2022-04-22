@@ -9,7 +9,7 @@ using Db4objects.Db4o.Query;
 
 namespace Lab1
 {
-    class Session
+    public class Session
     {
         public Session(
             Commission commission,
