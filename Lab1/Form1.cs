@@ -267,6 +267,7 @@ namespace Lab1
             {
                 IObjectSet commissionSet = db.QueryByExample(commissionProto);
                 commissionRes = (Commission)commissionSet.Next();
+                db.Close();
             }
             Session.addSession(commissionRes,date,place);
             refreshSessionGV();
@@ -304,7 +305,7 @@ namespace Lab1
             refreshSessionGV();
         }
 
-        private void openParticipantsForm(object sender, MouseEventArgs e)
+        private void openParticipants_Click(object sender, EventArgs e)
         {
             string commissionName = sessionGV.CurrentRow.Cells[0].Value.ToString();
             DateTime date = Convert.ToDateTime(sessionGV.CurrentRow.Cells[1].Value.ToString());

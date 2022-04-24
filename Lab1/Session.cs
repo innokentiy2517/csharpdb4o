@@ -31,7 +31,7 @@ namespace Lab1
         Commission commission;
         DateTime date;
         string place;
-        private List<CommissionMember> sessionParticipants;
+        private List<CommissionMember> sessionParticipants = new List<CommissionMember>();
         public List<CommissionMember> SessionParticipants
         {
             get => sessionParticipants;
@@ -40,10 +40,6 @@ namespace Lab1
 
         public static void addParticipant(CommissionMember participant)
         {
-            using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
-            {
-                
-            }
         }
         
         public static void addSession(Commission commission,DateTime date,string place) 

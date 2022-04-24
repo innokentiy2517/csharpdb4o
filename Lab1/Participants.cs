@@ -11,22 +11,19 @@ namespace Lab1
         public Participants(Session session)
         {
             InitializeComponent();
-            using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
-            {
-                IObjectSet sessionSet = db.QueryByExample(session);
-                this.session = (Session)sessionSet.Next();
-                db.Close();
-            }
+            
+            this.session = session;
         }
 
         private void commissionMemberCombo_DropDown(object sender, EventArgs e)
         {
+            commissionMemberCombo.Items.Clear();
             using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
             {
                 IQuery query = db.Query();
                 query.Constrain(typeof(CommissionMember));
-                query.Descend("Commission").Descend("CommissionName").Constrain(session.Commission.CommissionName);
-                query.Descend("ExitDate").Constrain(DateTime.MinValue).Not();
+                query.Descend("commission").Descend("_commissionName").Constrain(session.Commission.CommissionName);
+                query.Descend("exitDate").Constrain(DateTime.MinValue);
                 IObjectSet result = query.Execute();
                 foreach (CommissionMember cm in result)
                 {
@@ -38,7 +35,7 @@ namespace Lab1
 
         private void refreshGV()
         {
-            if (session.SessionParticipants.Count == 0) return;
+            if (session.SessionParticipants.Count == 0||session.SessionParticipants == null) return;
             participantsGV.Rows.Clear();
             if (participantsGV.Columns.Count == 0)
             {
@@ -53,10 +50,11 @@ namespace Lab1
 
             using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
             {
-                IQuery query = db.Query();
-                query.Constrain(typeof(CommissionMember));
-                IObjectSet commissionMembers = query.Execute();
-                foreach (CommissionMember cm in commissionMembers)
+                /*IQuery query = db.Query();
+                query.Constrain(typeof(Session));
+                query.
+                IObjectSet commissionMembers = query.Execute();*/
+                foreach (CommissionMember cm in session.SessionParticipants)
                 {
                     string exitDate;
                     string chairStartDate;
@@ -90,6 +88,43 @@ namespace Lab1
         private void button2_Click(object sender, EventArgs e)
         {
             
+        }
+
+        private void addParticipant_Click(object sender, EventArgs e)
+        {
+            string[] FIO = commissionMemberCombo.SelectedItem.ToString().Split();
+            using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
+            {
+                IQuery query = db.Query();
+                query.Constrain(typeof(CommissionMember));
+                query.Descend("commission").Descend("_commissionName").Constrain(session.Commission.CommissionName);
+                query.Descend("person").Descend("firstName").Constrain(FIO[1]);
+                query.Descend("person").Descend("middleName").Constrain(FIO[2]);
+                query.Descend("person").Descend("secondName").Constrain(FIO[0]);
+                query.Descend("exitDate").Constrain(DateTime.MinValue);
+                IObjectSet result = query.Execute();
+                CommissionMember cm = (CommissionMember)result.Next();
+                session.SessionParticipants.Add(cm);
+                db.Close();
+            }
+            refreshGV();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
+            {
+                IQuery query = db.Query();
+                query.Constrain(typeof(Session));
+                query.Descend("place").Constrain(session.Place);
+                query.Descend("date").Constrain(Convert.ToDateTime(session.Date.ToString()));
+                // query.Descend("commission").Descend("_commissionName").Constrain(session.Commission.CommissionName);
+                IObjectSet sessionSet = query.Execute();
+                Session sessionRes = (Session)sessionSet.Next();
+                // sessionRes.SessionParticipants = session.SessionParticipants;
+                // db.Store(sessionRes);
+                // db.Close();
+            }
         }
     }
 }
