@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -11,6 +12,14 @@ namespace Lab1
 {
     public class Session
     {
+        Commission commission;
+        DateTime date;
+        string place;
+        public Commission Commission {get => commission;set => commission = value;}
+
+        public DateTime Date {get => date; set => date = value; }
+
+        public string Place {get => place;set => place = value;}
         public Session(
             Commission commission,
             DateTime date,
@@ -22,15 +31,8 @@ namespace Lab1
             this.Place = place;
         }
 
-        public Commission Commission {get => commission;set => commission = value;}
+        
 
-        public DateTime Date {get => date; set => date = value; }
-
-        public string Place {get => place;set => place = value;}
-
-        Commission commission;
-        DateTime date;
-        string place;
         private List<CommissionMember> sessionParticipants = new List<CommissionMember>();
         public List<CommissionMember> SessionParticipants
         {
@@ -38,10 +40,6 @@ namespace Lab1
             set => sessionParticipants = value;
         }
 
-        public static void addParticipant(CommissionMember participant)
-        {
-        }
-        
         public static void addSession(Commission commission,DateTime date,string place) 
         {
             using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
@@ -127,6 +125,14 @@ namespace Lab1
                 MessageBox.Show(
                     "С удалением этой записи нить вашей судьбы обрывается. Загрузите предыдущий бекап базы данных дабы восстановаить течение судьбы, или живите дальше в проклятом мире, который сами и создали");
             }
+        }
+
+        public void addParticipant(IObjectContainer db, CommissionMember cm)
+        {
+            IObjectSet cmSet = db.QueryByExample(cm);
+            CommissionMember cmRes = (CommissionMember)cmSet.Next();
+            SessionParticipants.Add(cm);
+            MessageBox.Show(this.SessionParticipants[0].Person.SecondName);
         }
     }
 }

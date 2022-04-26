@@ -200,7 +200,7 @@ namespace Lab1
             Commission commissionProto = new Commission(commissionName);
             using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
             {
-                if (dgv.CurrentRow.Cells[6].Value.ToString() == "")
+                if (dgv.CurrentRow.Cells[4].Value.ToString() == "False")
                 {
                     MessageBox.Show("Нельзя исключить из комиссии председателя");
                     return;

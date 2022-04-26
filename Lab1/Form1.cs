@@ -119,6 +119,15 @@ namespace Lab1
                 phoneHomeTextBox.Text,
                 phoneWorkTextBox.Text
                 );
+            firstNameTextBox.Clear();
+            secondNameTextBox.Clear();
+            middleNameTextBox.Clear();
+            cityTextBox.Clear();
+            streetTextBox.Clear();
+            houseNumberTextBox.Clear();
+            appartNumberTextBox.Clear();
+            phoneHomeTextBox.Clear();
+            phoneWorkTextBox.Clear();
             refreshPersonGV();
         }
 
@@ -204,7 +213,6 @@ namespace Lab1
             string firstName = FIO[1];
             string middleName = FIO[2];
             string secondName = FIO[0];
-            // Person personProto = new Person(firstName, middleName, secondName, null, null, null, null, null, null);
             Person personProto = new Person()
                 { FirstName = firstName, SecondName = secondName, MiddleName = middleName };
             Commission commissionProto = new Commission(commissionDropDown.SelectedItem.ToString());
@@ -319,11 +327,18 @@ namespace Lab1
                 Commission commissionRes = (Commission)commissionSet.Next();
                 sessionProto = new Session(commissionRes, date, place);
                 IObjectSet sessionSet = db.QueryByExample(sessionProto);
-                // Session sessionRes = (Session)sessionSet.Next();
                 db.Close();
             }
             p = new Participants(sessionProto);
             p.Show();
+        }
+
+        private void log(object sender, EventArgs e)
+        {
+            refreshCommissionGV();
+            refreshPersonGV();
+            refreshCommissionMemberGV();
+            refreshSessionGV();
         }
     }
 }
