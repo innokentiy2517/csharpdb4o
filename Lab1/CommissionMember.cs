@@ -200,7 +200,7 @@ namespace Lab1
             Commission commissionProto = new Commission(commissionName);
             using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
             {
-                if (dgv.CurrentRow.Cells[4].Value.ToString() == "False")
+                if (dgv.CurrentRow.Cells[4].Value.ToString() != "False")
                 {
                     MessageBox.Show("Нельзя исключить из комиссии председателя");
                     return;
@@ -223,8 +223,16 @@ namespace Lab1
                     false,
                     Convert.ToDateTime(dgv.CurrentRow.Cells[2].Value.ToString())
                 );
-                commissionMemberProto.ChairStartDate = Convert.ToDateTime(dgv.CurrentRow.Cells[5].Value.ToString());
-                commissionMemberProto.ChairEndDate = Convert.ToDateTime(dgv.CurrentRow.Cells[6].Value.ToString());
+                if (dgv.CurrentRow.Cells[5].Value.ToString() == "" && dgv.CurrentRow.Cells[6].Value.ToString() == "")
+                {
+                    commissionMemberProto.ChairStartDate = DateTime.MinValue;
+                    commissionMemberProto.ChairEndDate = DateTime.MinValue;
+                }
+                else
+                {
+                    commissionMemberProto.ChairStartDate = Convert.ToDateTime(dgv.CurrentRow.Cells[5].Value.ToString());
+                    commissionMemberProto.ChairEndDate = Convert.ToDateTime(dgv.CurrentRow.Cells[6].Value.ToString());
+                }
                 IObjectSet cmResult = db.QueryByExample(commissionMemberProto);
                 CommissionMember cm = (CommissionMember)cmResult.Next();
                 cm.ExitDate=DateTime.Today.Date;

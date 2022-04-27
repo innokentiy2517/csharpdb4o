@@ -340,5 +340,40 @@ namespace Lab1
             refreshCommissionMemberGV();
             refreshSessionGV();
         }
+
+        private void request1Button_Click(object sender, EventArgs e)
+        {
+            request1GV.Rows.Clear();
+            if (request1GV.Columns.Count == 0)
+            {
+                request1GV.Columns.Add("commissionName", "Название комисcии");
+                request1GV.Columns.Add("cmCount", "Количество членов");
+            }
+            if (requestTextBox.Text == "")return;
+            string startsWith = requestTextBox.Text;
+            using (IObjectContainer db = Db4oEmbedded.OpenFile(dbName))
+            {
+                IQuery query = db.Query();
+                query.Constrain(typeof(Commission));
+                query.Descend("_commissionName").Constrain(startsWith).StartsWith(false);
+                IObjectSet comSet = query.Execute();
+                foreach (Commission com in comSet)
+                {
+                    query = db.Query();
+                    query.Constrain(typeof(CommissionMember));
+                    query.Descend("commission").Descend("_commissionName").Constrain(com.CommissionName);
+                    query.Descend("exitDate").Constrain(DateTime.MinValue);
+                    IObjectSet cmSet = query.Execute();
+                    int cmCount = 0;
+                    foreach (CommissionMember cm in cmSet)
+                    {
+                        cmCount++;
+                    }
+
+                    if (cmCount >= 10) continue;
+                    request1GV.Rows.Add(com.CommissionName, cmCount);
+                }
+            }
+        }
     }
 }
