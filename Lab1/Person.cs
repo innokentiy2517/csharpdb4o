@@ -6,10 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Perst;
 
 namespace Lab1
 {
-    public class Person
+    public class Person : Persistent
     {
         private string
             firstName,
@@ -20,6 +21,7 @@ namespace Lab1
             phoneHome,
             phoneWork;
         private int
+            id,
             addressHouseNumber,
             addressAppartmentNumber;
 
@@ -32,6 +34,7 @@ namespace Lab1
             string addressStreet,
             string phoneHome,
             string phoneWork,
+            int? id,
             int? addressHouseNumber,
             int? addressAppartmentNumber
             )
@@ -43,6 +46,7 @@ namespace Lab1
             this.AddressStreet = addressStreet;
             this.PhoneHome = phoneHome;
             this.PhoneWork = phoneWork;
+            this.Id = (int)id;
             this.AddressHouseNumber = (int)addressHouseNumber;
             this.AddressAppartmentNumber = (int)addressAppartmentNumber;
         }
@@ -56,6 +60,13 @@ namespace Lab1
         public string PhoneWork { get => phoneWork; set => phoneWork = value; }
         public int AddressHouseNumber { get => addressHouseNumber; set => addressHouseNumber = value; }
         public int AddressAppartmentNumber { get => addressAppartmentNumber; set => addressAppartmentNumber = value; }
+        public int Id { get => id; set => id = value; }
+
+        private static int uniqueId(int id, MyRoot Root)
+        {
+            int unique = Root.index_Person.Cast<Person>().Count(p => p.Id == id);
+            return unique;
+        }
 
         public static void addPerson(
             string FirstName,
@@ -66,19 +77,31 @@ namespace Lab1
             int AddressHouseNumber,
             int AddressAppartmentNumber,
             string PhoneHome,
-            string PhoneWork
+            string PhoneWork,
+            int id,
+            Storage db
             )
         {
-            Person newPerson = new Person(FirstName, MiddleName, SecondName, AddressCity, AddressStreet, PhoneHome, PhoneWork, AddressHouseNumber, AddressAppartmentNumber);
-            using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
+            /*using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
             {
                 db.Store(newPerson);
                 db.Close();
             }
-            MessageBox.Show("Запись о члене ГорДумы успешно создана!");
+            MessageBox.Show("Запись о члене ГорДумы успешно создана!");*/
+            MyRoot Root = HelperDb<Person>.CreateRoot(db);
+            db.Open(Form1.dbName);
+            if (uniqueId(id, Root) != 0)
+            {
+                id++;
+            }
+            Person newPerson = new Person(FirstName, MiddleName, SecondName, AddressCity, AddressStreet, PhoneHome, PhoneWork, id, AddressHouseNumber, AddressAppartmentNumber);
+
+            Root.index_Person.Put(newPerson);
+            MessageBox.Show("Член ГорДумы создан","Сообщение", MessageBoxButtons.OK);
+            db.Close();
         }
 
-        public static void getPersons(DataGridView dataGridView, IObjectContainer db)
+        /*public static void getPersons(DataGridView dataGridView, IObjectContainer db)
         {
             dataGridView.Rows.Clear();
             if (dataGridView.Columns.Count == 0)
@@ -93,7 +116,7 @@ namespace Lab1
                 dataGridView.Columns.Add("PhoneHome", "Домашний номер телефона");
                 dataGridView.Columns.Add("PhoneWork", "Рабочий номер телефона");
             }
-
+        
             IQuery query = db.Query();
             query.Constrain(typeof(Person));
             IObjectSet persons = query.Execute();
@@ -111,14 +134,35 @@ namespace Lab1
                     p.PhoneWork
                     );
             }
-        }
+        }*/
 
         public static void UpdatePerson(
-            DataGridView dgv,
-            Person toEdit
+            Person toEdit,
+            Storage db,
+            int id
             )
         {
-            if (dgv.SelectedRows.Count != 0)
+            MyRoot Root = HelperDb<Person>.CreateRoot(db);
+            db.Open(Form1.dbName);
+            Person person = null;
+            foreach (Person p in Root.index_Person.Cast<Person>().Where(p => p.Id == id))
+            {
+                person = p;
+            }
+
+            person.FirstName = toEdit.FirstName;
+            person.MiddleName = toEdit.MiddleName;
+            person.SecondName = toEdit.SecondName;
+            person.AddressCity = toEdit.AddressCity;
+            person.AddressStreet = toEdit.AddressStreet;
+            person.AddressHouseNumber = toEdit.AddressHouseNumber;
+            person.AddressAppartmentNumber = toEdit.AddressAppartmentNumber;
+            person.PhoneHome = toEdit.PhoneHome;
+            person.PhoneWork = toEdit.PhoneWork;
+            person.Modify();
+            MessageBox.Show("Запись изменена", "Сообщение", MessageBoxButtons.OK);
+            db.Close();
+            /*if (dgv.SelectedRows.Count != 0)
             {
                 Person person = new Person(
                 dgv.CurrentRow.Cells[0].Value.ToString(),
@@ -148,12 +192,24 @@ namespace Lab1
                 }
                 MessageBox.Show("Изменения сохранены!");
             }
-            else MessageBox.Show("Запись не выбрана", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else MessageBox.Show("Запись не выбрана", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);*/
         }
 
-        public static void DeletePerson(DataGridView dgv)
+        public static void DeletePerson(DataGridView dgv, Storage db)
         {
-            Person personToDelete = new Person(
+            int id = (int)dgv.CurrentRow.Cells[0].Value;
+            MyRoot Root = HelperDb<Person>.CreateRoot(db);
+            db.Open(Form1.dbName);
+            Person person = null;
+            foreach (Person p in Root.index_Person.Cast<Person>().Where(p=>p.Id == id))
+            {
+                person = p;
+            }
+
+            Root.index_Person.Remove(person);
+            MessageBox.Show("Запись удалена!", "Сообщение", MessageBoxButtons.OK);
+            db.Close();
+            /*Person personToDelete = new Person(
                 dgv.CurrentRow.Cells[0].Value.ToString(),
                 dgv.CurrentRow.Cells[1].Value.ToString(),
                 dgv.CurrentRow.Cells[2].Value.ToString(),
@@ -163,8 +219,9 @@ namespace Lab1
                 dgv.CurrentRow.Cells[8].Value.ToString(),
                 Convert.ToInt32(dgv.CurrentRow.Cells[5].Value),
                 Convert.ToInt32(dgv.CurrentRow.Cells[6].Value));
+                */
 
-            if (MessageBox.Show("ОПАСНА. ВЫ ХОТИТЕ УДАЛИТЬ ЗАПИСЬ?", "АХТУНГ", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK)
+            /*if (MessageBox.Show("ОПАСНА. ВЫ ХОТИТЕ УДАЛИТЬ ЗАПИСЬ?", "АХТУНГ", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK)
             {
                 using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
                 {
@@ -176,7 +233,7 @@ namespace Lab1
                     db.Close();
                 }
                 MessageBox.Show("С удалением этой записи нить вашей судьбы обрывается. Загрузите предыдущий бекап базы данных дабы восстановаить течение судьбы, или живите дальше в проклятом мире, который сами и создали");
-            }
+            }*/
         }
     }
 }

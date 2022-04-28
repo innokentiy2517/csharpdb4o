@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Db4objects.Db4o;
 using Db4objects.Db4o.Query;
+using Perst;
 
 namespace Lab1
 {
-    public class CommissionMember
+    public class CommissionMember: Persistent
     {
+        private int id;
         private Person person;
         private Commission commission;
         private bool isChairman;
@@ -24,15 +26,18 @@ namespace Lab1
                 Person person,
                 Commission commission,
                 bool isChairman,
-                DateTime entryDate
+                DateTime entryDate,
+                int id
             )
         {
             this.Person = person;
             this.Commission = commission;
             this.IsChairman = isChairman;
             this.EntryDate = entryDate;
+            this.Id = id;
         }
 
+        public int Id { get => id; set => id = value; }
         public bool IsChairman { get => isChairman; set => isChairman = value; }
         public DateTime EntryDate { get => entryDate; set => entryDate = value; }
         public DateTime ExitDate { get => exitDate; set => exitDate = value; }
@@ -41,13 +46,28 @@ namespace Lab1
         internal Person Person { get => person; set => person = value; }
         internal Commission Commission { get => commission; set => commission = value; }
 
+        private static int uniqueId(int id, MyRoot Root)
+        {
+            int unique = Root.index_commissionMember.Cast<CommissionMember>().Count(cm => cm.Id == id);
+            return unique;
+        }
+        
         public static void addCommissionMember
         (
             Person person,
-            Commission commission
+            Commission commission,
+            int id,
+            Storage db
         )
         {
-            using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
+            MyRoot Root = HelperDb<CommissionMember>.CreateRoot(db);
+            db.Open(Form1.dbName);
+            if (uniqueId(id, Root) != 0) { id++;}
+
+            CommissionMember newCommissionMember =
+                new CommissionMember(person, commission, false, DateTime.MinValue, id);
+            Root.index_commissionMember.Put(newCommissionMember);
+            /*using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
             {
                 IObjectSet personSet = db.QueryByExample(person);
                 Person resPerson = (Person)personSet.Next();
@@ -56,11 +76,12 @@ namespace Lab1
                 CommissionMember commissionMember = new CommissionMember(resPerson, resCommission, false, DateTime.Today);
                 db.Store(commissionMember);
                 db.Close();
-            }
+            }*/
             MessageBox.Show("Запись о члене комиссии успешно создана");
+            db.Close();
         }
 
-        public static void getCommissionMembers(DataGridView dgv, IObjectContainer db)
+        /*public static void getCommissionMembers(DataGridView dgv, IObjectContainer db)
         {
             dgv.Rows.Clear();
             if (dgv.Columns.Count == 0)
@@ -99,11 +120,20 @@ namespace Lab1
                     chairEndDate
                 );
             }
-        }
+        }*/
 
-        public static void assignChair(DataGridView dgv)
+        public static void assignChair(int id, Storage db)
         {
-            string[] personFIO = dgv.CurrentRow.Cells[0].Value.ToString().Split();
+            MyRoot Root = HelperDb<CommissionMember>.CreateRoot(db);
+            db.Open(Form1.dbName);
+            CommissionMember toEdit = (CommissionMember)Root.index_commissionMember[id];
+            toEdit.IsChairman = true;
+            toEdit.chairStartDate = DateTime.Today.Date;
+            toEdit.ChairEndDate = DateTime.MinValue.Date;
+            toEdit.Modify();
+            db.Close();
+            MessageBox.Show("Председатель назначен", "Сообщение", MessageBoxButtons.OK);
+            /*string[] personFIO = dgv.CurrentRow.Cells[0].Value.ToString().Split();
             Person personProto = new Person()
             {
                 FirstName = personFIO[1],
@@ -141,13 +171,24 @@ namespace Lab1
                 cm.ChairStartDate=DateTime.Today.Date;
                 db.Store(cm);
                 db.Close();
-            }
-            MessageBox.Show("Председатель успешно назначен");
+            }*/
         }
 
-        public static void deassignChair(DataGridView dgv)
+        public static void deassignChair(int id, Storage db)
         {
-            string[] personFIO = dgv.CurrentRow.Cells[0].Value.ToString().Split();
+            MyRoot Root = HelperDb<CommissionMember>.CreateRoot(db);
+            db.Open(Form1.dbName);
+            CommissionMember toEdit = (CommissionMember)Root.index_commissionMember[id];
+            if (toEdit.IsChairman)
+            {
+                MessageBox.Show("Член комиссии не является председателем");
+                return;
+            }
+            toEdit.IsChairman = false;
+            toEdit.ChairEndDate = DateTime.Today.Date;
+            toEdit.Modify();
+            db.Close();
+            /*string[] personFIO = dgv.CurrentRow.Cells[0].Value.ToString().Split();
             Person personProto = new Person()
             {
                 FirstName = personFIO[1],
@@ -183,13 +224,29 @@ namespace Lab1
                 cm.ChairEndDate=DateTime.Today.Date;
                 db.Store(cm);
                 db.Close();
-            }
+            }*/
             MessageBox.Show("Председатель успешно снят с должности");
         }
 
-        public static void exileMember(DataGridView dgv)
+        public static void exileMember(int id, Storage db)
         {
-            string[] personFIO = dgv.CurrentRow.Cells[0].Value.ToString().Split();
+            MyRoot Root = HelperDb<CommissionMember>.CreateRoot(db);
+            db.Open(Form1.dbName);
+            CommissionMember toEdit = (CommissionMember)Root.index_commissionMember[id];
+            if (toEdit.ExitDate != DateTime.MinValue)
+            {
+                MessageBox.Show("Член комиссии уже не состоит в комисии");
+                return;
+            }
+            if (toEdit.ChairEndDate == DateTime.MinValue)
+            {
+                toEdit.IsChairman = false;
+                toEdit.ChairEndDate = DateTime.Today.Date;
+            }
+            toEdit.ExitDate = DateTime.Today.Date;
+            toEdit.Modify();
+            db.Close();
+            /*string[] personFIO = dgv.CurrentRow.Cells[0].Value.ToString().Split();
             Person personProto = new Person()
             {
                 FirstName = personFIO[1],
@@ -211,7 +268,7 @@ namespace Lab1
                     MessageBox.Show("Данный член комиссии не является председателем");
                     return;
                 }
-                else isChairman = true;*/
+                else isChairman = true;#1#
 
                 IObjectSet personSet = db.QueryByExample(personProto);
                 Person personRes = (Person)personSet.Next();
@@ -230,7 +287,7 @@ namespace Lab1
                 cm.ExitDate=DateTime.Today.Date;
                 db.Store(cm);
                 db.Close();
-            }
+            }*/
             MessageBox.Show("Член комиссии успешно исключен");
         }
     }
