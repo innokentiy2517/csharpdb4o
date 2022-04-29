@@ -22,22 +22,6 @@ namespace Lab1
         this.CommissionName = name;
     }
 
-    /*public static void getComissions(DataGridView dataGridView, IObjectContainer db)
-    {
-        dataGridView.Rows.Clear();
-        if (!dataGridView.Columns.Contains("CommissionName"))
-        {
-            dataGridView.Columns.Add("CommissionName", "Название комиссии");
-        }
-        IQuery query = db.Query();
-        query.Constrain(typeof(Commission));
-        IObjectSet commissions = query.Execute();
-        foreach (Commission c in commissions)
-        {
-            dataGridView.Rows.Add(c.CommissionName);
-        }
-    }*/
-
     public static void AddCommission(string name, int id, Storage db)
     {
         MyRoot Root = HelperDb<Commission>.CreateRoot(db);
@@ -50,12 +34,7 @@ namespace Lab1
 
         Commission newCommission = new Commission(name, id);
         Root.index_commission.Put(newCommission);
-        /*using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
-        {
-            Commission commission = new Commission(name);
-            db.Store(commission);
-            db.Close();
-        }*/
+        Root.Store();
         MessageBox.Show("Комиссия создана");
         db.Close();
     }
@@ -72,20 +51,6 @@ namespace Lab1
 
         commission.CommissionName = toEdit.CommissionName;
         commission.Modify();
-        /*if (dgv.SelectedRows.Count != 0)
-        {
-            Commission commission = new Commission(dgv.CurrentRow.Cells[0].Value.ToString());
-            using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
-            {
-                IObjectSet temp = db.QueryByExample(commission);
-                Commission found = (Commission)temp.Next();
-                found.CommissionName = toEdit.CommissionName;
-                db.Store(found);
-                db.Close();
-            }
-
-        }
-        else MessageBox.Show("Запись не выбрана", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);*/
         MessageBox.Show("Изменения сохранены");
         db.Close();
     }
@@ -104,24 +69,6 @@ namespace Lab1
         Root.index_commission.Remove(commission);
         MessageBox.Show("Запись удалена!", "Сообщение", MessageBoxButtons.OK);
         db.Close();
-        /*Commission commissionToDelete = new Commission(dgv.CurrentRow.Cells[0].Value.ToString());
-        if (MessageBox.Show("ОПАСНА. ВЫ ХОТИТЕ УДАЛИТЬ ЗАПИСЬ?", "АХТУНГ", MessageBoxButtons.OKCancel,
-                MessageBoxIcon.Question) == DialogResult.OK)
-        {
-            using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
-            {
-                IObjectSet result = db.QueryByExample(commissionToDelete);
-                foreach (Commission c in result)
-                {
-                    db.Delete(c);
-                }
-
-                db.Close();
-            }
-
-            MessageBox.Show(
-                "С удалением этой записи нить вашей судьбы обрывается. Загрузите предыдущий бекап базы данных дабы восстановаить течение судьбы, или живите дальше в проклятом мире, который сами и создали");
-        }*/
     }
 
     private static int uniqueId(int id, MyRoot Root)

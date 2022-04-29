@@ -10,13 +10,14 @@ using System.Windows.Forms;
 using Db4objects.Db4o;
 using Db4objects.Db4o.Internal.Query;
 using Db4objects.Db4o.Query;
+using Perst;
 
 namespace Lab1
 {
     public partial class Form1 : Form
     {
-        private static HelperDb<object> dbHelper;
-        private static MyRoot root;
+        public static HelperDb<object> dbHelper;
+        public static MyRoot root;
         public static string dbName = "Gorduma.dbs";
         public Form1()
         {
@@ -36,30 +37,53 @@ namespace Lab1
             if (dbHelper.db.Root == null)
             {
                 dbHelper.db.Root = new MyRoot(dbHelper.db);
-            }
-
-            if (type == typeof(Person))
+            }else if (type == typeof(Person))
             {
                 dgv.Rows.Clear();
+                if (dgv.Columns.Count == 0)
+                {
+                    dgv.Columns.Add("ID", "ID");
+                    dgv.Columns.Add("FirstName", "Имя");
+                    dgv.Columns.Add("MiddleName", "Отчество");
+                    dgv.Columns.Add("SecondName", "Фамилия");
+                    dgv.Columns.Add("AddressCity", "Город");
+                    dgv.Columns.Add("AddressStreet", "Улица");
+                    dgv.Columns.Add("AddressHouseNumber", "№ Дома");
+                    dgv.Columns.Add("AddressAppartmentNumber", "№ Квартиры");
+                    dgv.Columns.Add("PhoneHome", "Домашний номер телефона");
+                    dgv.Columns.Add("PhoneWork", "Рабочий номер телефона");
+                }
                 foreach (Person p in dbHelper.Read(root.index_Person))
                 {
-                    dgv.Rows.Add(p.Id, p.SecondName, p.FirstName, p.MiddleName, p.AddressCity, p.AddressStreet,
+                    dgv.Rows.Add(p.Id, p.FirstName, p.MiddleName, p.SecondName, p.AddressCity, p.AddressStreet,
                         p.AddressHouseNumber, p.AddressAppartmentNumber, p.PhoneHome, p.PhoneWork);
                 }
-            }
-
-            if (type == typeof(Commission))
+            }else if (type == typeof(Commission))
             {
                 dgv.Rows.Clear();
+                if (dgv.Columns.Count==0)
+                {
+                    dgv.Columns.Add("ID", "ID");
+                    dgv.Columns.Add("CommissionName", "Название комиссии");
+                }
                 foreach (Commission c in dbHelper.Read(root.index_commission))
                 {
                     dgv.Rows.Add(c.Id, c.CommissionName);
                 }
-            }
-
-            if (type == typeof(CommissionMember))
+            } else if (type == typeof(CommissionMember))
             {
                 dgv.Rows.Clear();
+                if (dgv.Columns.Count == 0)
+                {
+                    dgv.Columns.Add("ID", "ID");
+                    dgv.Columns.Add("PersonName", "ФИО Члена комиссии");
+                    dgv.Columns.Add("CommissionName", "Комиссия");
+                    dgv.Columns.Add("EntryDate", "Дата вступления");
+                    dgv.Columns.Add("ExitDate", "Дата выхода");
+                    dgv.Columns.Add("IsChairman", "Председатель");
+                    dgv.Columns.Add("ChairStartDate", "Дата начала председательлства");
+                    dgv.Columns.Add("ChairEndDate", "Дата конца председательлства");
+                }
                 foreach (CommissionMember cm in dbHelper.Read(root.index_commissionMember))
                 {
                     string exitDate;
@@ -72,9 +96,7 @@ namespace Lab1
                     if (cm.ChairEndDate.Date == DateTime.MinValue) chairEndDate = "";
                     else chairEndDate = cm.ChairEndDate.ToString();
                     dgv.Rows.Add(cm.Id,
-                        cm.Person.SecondName,
-                        cm.Person.FirstName,
-                        cm.Person.MiddleName,
+                        cm.Person.SecondName+" "+cm.Person.FirstName+" "+cm.Person.MiddleName,
                         cm.Commission.CommissionName,
                         cm.EntryDate.Date.ToString(),
                         exitDate,
@@ -82,52 +104,34 @@ namespace Lab1
                         chairStartDate,
                         chairEndDate);
                 }
+            } else if (type == typeof(Session))
+            {
+                dgv.Rows.Clear();
+                if (dgv.Columns.Count == 0)
+                {
+                    dgv.Columns.Add("ID", "ID");
+                    dgv.Columns.Add("sessionCommission", "Комиссия");
+                    dgv.Columns.Add("sessionDate", "Дата собрания");
+                    dgv.Columns.Add("sessionPlace", "Место проведения");
+                }
+                foreach (Session s in dbHelper.Read(root.index_session))
+                {
+                    dgv.Rows.Add(
+                        s.Id,
+                        s.Commission.CommissionName,
+                        s.Place,
+                        s.Date);
+                }
             }
             dbHelper.db.Close();
         }
         
-        /*private void refreshCommissionGV()
-        {
-            using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
-            {
-                Commission.getComissions(commissionGridView, db);
-                db.Close();
-            }
-        }*/
-
-        /*private void refreshPersonGV()
-        {
-            using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
-            {
-                Person.getPersons(personGridView, db);
-                db.Close();
-            }
-        }*/
-        
-        /*private void refreshCommissionMemberGV()
-        {
-            using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
-            {
-                CommissionMember.getCommissionMembers(commissionMemberDGV, db);
-                db.Close();
-            }
-        }*/
-
-        private void refreshSessionGV()
-        {
-            using (IObjectContainer db = Db4oEmbedded.OpenFile(dbName))
-            {
-                Session.getSessions(sessionGV,db);
-                db.Close();
-            }
-        }
-
         private void Form1_Load(object sender, EventArgs e)
         {
             ReadF(commissionGridView, typeof(Commission));
             ReadF(personGridView,typeof(Person));
             ReadF(commissionMemberDGV, typeof(CommissionMember));
-            refreshSessionGV();
+            ReadF(sessionGV,typeof(Session));
         }
 
         private void tabPage2_Click(object sender, EventArgs e)
@@ -156,15 +160,15 @@ namespace Lab1
         private void personGridView_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             if (personGridView.Rows.Count == 0) return;
-            firstNameTextBox.Text = personGridView.CurrentRow.Cells[0].Value.ToString();
-            middleNameTextBox.Text = personGridView.CurrentRow.Cells[1].Value.ToString();
-            secondNameTextBox.Text = personGridView.CurrentRow.Cells[2].Value.ToString();
-            cityTextBox.Text = personGridView.CurrentRow.Cells[3].Value.ToString();
-            streetTextBox.Text = personGridView.CurrentRow.Cells[4].Value.ToString();
-            houseNumberTextBox.Text = personGridView.CurrentRow.Cells[5].Value.ToString();
-            appartNumberTextBox.Text = personGridView.CurrentRow.Cells[6].Value.ToString();
-            phoneHomeTextBox.Text = personGridView.CurrentRow.Cells[7].Value.ToString();
-            phoneWorkTextBox.Text = personGridView.CurrentRow.Cells[8].Value.ToString();
+            firstNameTextBox.Text = personGridView.CurrentRow.Cells[1].Value.ToString();
+            middleNameTextBox.Text = personGridView.CurrentRow.Cells[2].Value.ToString();
+            secondNameTextBox.Text = personGridView.CurrentRow.Cells[3].Value.ToString();
+            cityTextBox.Text = personGridView.CurrentRow.Cells[4].Value.ToString();
+            streetTextBox.Text = personGridView.CurrentRow.Cells[5].Value.ToString();
+            houseNumberTextBox.Text = personGridView.CurrentRow.Cells[6].Value.ToString();
+            appartNumberTextBox.Text = personGridView.CurrentRow.Cells[7].Value.ToString();
+            phoneHomeTextBox.Text = personGridView.CurrentRow.Cells[8].Value.ToString();
+            phoneWorkTextBox.Text = personGridView.CurrentRow.Cells[9].Value.ToString();
         }
 
         private void addPersonButton_Click(object sender, EventArgs e)
@@ -218,7 +222,7 @@ namespace Lab1
         private void commissionGridView_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             if (commissionGridView.Rows.Count == 0) return;
-            textBox1.Text = commissionGridView.CurrentRow.Cells[0].Value.ToString();
+            textBox1.Text = commissionGridView.CurrentRow.Cells[1].Value.ToString();
         }
 
         private void commissionDeleteButton_Click(object sender, EventArgs e)
@@ -234,42 +238,24 @@ namespace Lab1
 
         private void personComboBox_DropDown(object sender, EventArgs e)
         {
+            dbHelper.db.Open(dbName);
             personComboBox.Items.Clear();
-            foreach (Person p in root.index_Person.Cast<Person>())
+            foreach (Person p in dbHelper.Read(root.index_Person))
             {
                 personComboBox.Items.Add(p.SecondName + " " + p.FirstName + " " + p.MiddleName);
             }
-            /*using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
-            {
-                IQuery query = db.Query();
-                query.Constrain(typeof(Person));
-                IObjectSet personsSet = query.Execute();
-                foreach (Person person in personsSet)
-                {
-                    personComboBox.Items.Add(person.SecondName +" "+ person.FirstName +" "+ person.MiddleName);
-                }
-                db.Close();
-            }*/
+            dbHelper.db.Close();
         }
 
         private void commissionDropDown_DropDown(object sender, EventArgs e)
         {
+            dbHelper.db.Open(dbName);
             commissionDropDown.Items.Clear();
-            foreach (Commission c in root.index_commission.Cast<Commission>())
+            foreach (Commission c in dbHelper.Read(root.index_commission))
             {
                 commissionDropDown.Items.Add(c.CommissionName);
             }
-            /*using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
-            {
-                IQuery query = db.Query();
-                query.Constrain(typeof(Commission));
-                IObjectSet commissionSet = query.Execute();
-                foreach (Commission c in commissionSet)
-                {
-                    commissionDropDown.Items.Add(c.CommissionName);
-                }
-                db.Close();
-            }*/
+            dbHelper.db.Close();
         }
 
         private void assignChairmanButton_Click(object sender, EventArgs e)
@@ -280,6 +266,7 @@ namespace Lab1
 
         private void addCommissionMemberButton_Click(object sender, EventArgs e)
         {
+            dbHelper.db.Open(dbName);
             string personFIO = personComboBox.SelectedItem.ToString();
             string[] FIO = personFIO.Split();
             string firstName = FIO[1];
@@ -296,22 +283,7 @@ namespace Lab1
             {
                 commission = c;
             }
-            /*Person personProto = new Person()
-                { FirstName = firstName, SecondName = secondName, MiddleName = middleName };
-            Commission commissionProto = new Commission(commissionDropDown.SelectedItem.ToString());
-            IObjectSet person;
-            IObjectSet commission;
-            Person resPerson;
-            Commission resCommission;
-            using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
-            {
-                person = db.QueryByExample(personProto);
-                resPerson = (Person)person.Next();
-                commission = db.QueryByExample(commissionProto);
-                resCommission = (Commission)commission.Next();
-                db.Close();
-            }*/
-            
+            dbHelper.db.Close();
             CommissionMember.addCommissionMember(person, commission,commissionMemberDGV.Rows.Count, dbHelper.db);
             ReadF(commissionMemberDGV, typeof(CommissionMember));
         }
@@ -330,22 +302,13 @@ namespace Lab1
 
         private void sessionCommisisonComboSet()
         {
+            dbHelper.db.Open(dbName);
             sessionCommissionCombo.Items.Clear();
-            foreach (Commission c in root.index_commission.Cast<Commission>())
+            foreach (Commission c in dbHelper.Read(root.index_commission))
             {
                 sessionCommissionCombo.Items.Add(c.CommissionName);
             }
-            /*using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
-            {
-                IQuery query = db.Query();
-                query.Constrain(typeof(Commission));
-                IObjectSet commissionSet = query.Execute();
-                foreach (Commission c in commissionSet)
-                {
-                    sessionCommissionCombo.Items.Add(c.CommissionName);
-                }
-                db.Close();
-            }*/
+            dbHelper.db.Close();
         }
         
         private void sessionCommissionCombo_DropDown(object sender, EventArgs e)
@@ -355,69 +318,59 @@ namespace Lab1
 
         private void addSessionButton_Click(object sender, EventArgs e)
         {
-            Commission commissionProto = new Commission(sessionCommissionCombo.SelectedItem.ToString());
-            DateTime date = sessionDatePicker.Value;
+            dbHelper.db.Open(dbName);
             string place = sessionPlaceTextBox.Text;
-            Commission commissionRes;
-            using (IObjectContainer db = Db4oEmbedded.OpenFile(dbName))
+            DateTime date = sessionDatePicker.Value;
+            Commission commissionRes = null;
+            foreach (Commission c in root.index_commission.Cast<Commission>().Where(c=>c.CommissionName==sessionCommissionCombo.SelectedItem.ToString()))
             {
-                IObjectSet commissionSet = db.QueryByExample(commissionProto);
-                commissionRes = (Commission)commissionSet.Next();
-                db.Close();
+                commissionRes = c;
             }
-            Session.addSession(commissionRes,date,place);
-            refreshSessionGV();
+            dbHelper.db.Close();
+            Session.addSession(
+                commissionRes,
+                date,
+                place,
+                sessionGV.Rows.Count,
+                dbHelper.db
+                );
+            ReadF(sessionGV,typeof(Session));
         }
 
         private void sessionGV_mouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             sessionCommisisonComboSet();
             if (commissionGridView.Rows.Count == 0) return;
-            sessionCommissionCombo.SelectedIndex = sessionCommissionCombo.FindStringExact(sessionGV.CurrentRow.Cells[0].Value.ToString());
-            sessionDatePicker.Value = Convert.ToDateTime(sessionGV.CurrentRow.Cells[1].Value.ToString());
+            sessionCommissionCombo.SelectedIndex = sessionCommissionCombo.FindStringExact(sessionGV.CurrentRow.Cells[1].Value.ToString());
+            sessionDatePicker.Value = Convert.ToDateTime(sessionGV.CurrentRow.Cells[3].Value.ToString());
             sessionPlaceTextBox.Text = sessionGV.CurrentRow.Cells[2].Value.ToString();
         }
 
         private void updateSessionButton_Click(object sender, EventArgs e)
         {
-            Commission commissionProto = new Commission(sessionCommissionCombo.SelectedItem.ToString());
+            dbHelper.db.Open(dbName);
             DateTime date = sessionDatePicker.Value;
             string place = sessionPlaceTextBox.Text;
-            Commission commissionRes;
-            using (IObjectContainer db = Db4oEmbedded.OpenFile(dbName))
+            Commission commissionRes = null;
+            foreach (Commission c in root.index_commission.Cast<Commission>().Where(c=>c.CommissionName==sessionCommissionCombo.SelectedItem.ToString()))
             {
-                IObjectSet commissionSet = db.QueryByExample(commissionProto);
-                commissionRes = (Commission)commissionSet.Next();
+                commissionRes = c;
             }
-
-            Session edit = new Session(commissionRes, date, place);
-            Session.updateSession(sessionGV,edit);
-            refreshSessionGV();
+            dbHelper.db.Close();
+            Session edit = new Session(commissionRes, date, place,0);
+            Session.updateSession(sessionGV,edit,dbHelper.db);
+            ReadF(sessionGV,typeof(Session));
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            Session.deleteSession(sessionGV);
-            refreshSessionGV();
+            Session.deleteSession(sessionGV, dbHelper.db);
+            ReadF(sessionGV,typeof(Session));
         }
 
         private void openParticipants_Click(object sender, EventArgs e)
         {
-            string commissionName = sessionGV.CurrentRow.Cells[0].Value.ToString();
-            DateTime date = Convert.ToDateTime(sessionGV.CurrentRow.Cells[1].Value.ToString());
-            string place = sessionGV.CurrentRow.Cells[2].Value.ToString();
-            Commission commissionProto = new Commission(commissionName);
-            Form p;
-            Session sessionProto;
-            using (IObjectContainer db = Db4oEmbedded.OpenFile(dbName))
-            {
-                IObjectSet commissionSet = db.QueryByExample(commissionProto);
-                Commission commissionRes = (Commission)commissionSet.Next();
-                sessionProto = new Session(commissionRes, date, place);
-                IObjectSet sessionSet = db.QueryByExample(sessionProto);
-                db.Close();
-            }
-            p = new Participants(sessionProto);
+            Form p = new Participants((int)sessionGV.CurrentRow.Cells[0].Value);
             p.Show();
         }
 
@@ -426,7 +379,33 @@ namespace Lab1
             ReadF(commissionGridView, typeof(Commission));
             ReadF(personGridView,typeof(Person));
             ReadF(commissionMemberDGV, typeof(CommissionMember));
-            refreshSessionGV();
+            ReadF(sessionGV,typeof(Session));
+        }
+
+        private void indexQuery(DataGridView dgv, Storage db, DateTime dateFrom, DateTime dateTo)
+        {
+            dgv.Rows.Clear();
+            MyRoot Root = HelperDb<Session>.CreateRoot(db);
+            db.Open(dbName);
+
+            List<Session> session = Root.index_session.Cast<Session>()
+                .Where(s => s.Date >= dateFrom.Date&&s.Date<=dateTo.Date).ToList();
+            var sessionsGrouped = session.GroupBy(s => s.Commission.CommissionName, (ses) => new {Commission=ses.Commission.CommissionName,Place=ses.Place, Date=ses.Date});
+            if (dgv.Columns.Count == 0)
+            {
+                dgv.Columns.Add("CommissionName", "Комиссия");
+                dgv.Columns.Add("Place", "Место");
+                dgv.Columns.Add("Date", "Дата");
+            }
+            foreach (var s in sessionsGrouped)
+            {
+                // dgv.Rows.Add(s.Commission, s.)
+            }
+        }
+
+        private void indexQueryButton_Click(object sender, EventArgs e)
+        {
+            indexQuery(indexQueryDGV, dbHelper.db, fromDatePicker.Value, toDatePicker.Value);
         }
     }
 }

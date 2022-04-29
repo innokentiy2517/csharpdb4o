@@ -100,42 +100,7 @@ namespace Lab1
             MessageBox.Show("Член ГорДумы создан","Сообщение", MessageBoxButtons.OK);
             db.Close();
         }
-
-        /*public static void getPersons(DataGridView dataGridView, IObjectContainer db)
-        {
-            dataGridView.Rows.Clear();
-            if (dataGridView.Columns.Count == 0)
-            {
-                dataGridView.Columns.Add("FirstName", "Имя");
-                dataGridView.Columns.Add("MiddleName", "Отчество");
-                dataGridView.Columns.Add("SecondName", "Фамилия");
-                dataGridView.Columns.Add("AddressCity", "Город");
-                dataGridView.Columns.Add("AddressStreet", "Улица");
-                dataGridView.Columns.Add("AddressHouseNumber", "№ Дома");
-                dataGridView.Columns.Add("AddressAppartmentNumber", "№ Квартиры");
-                dataGridView.Columns.Add("PhoneHome", "Домашний номер телефона");
-                dataGridView.Columns.Add("PhoneWork", "Рабочий номер телефона");
-            }
         
-            IQuery query = db.Query();
-            query.Constrain(typeof(Person));
-            IObjectSet persons = query.Execute();
-            foreach (Person p in persons)
-            {
-                dataGridView.Rows.Add(
-                    p.FirstName,
-                    p.MiddleName,
-                    p.SecondName,
-                    p.AddressCity,
-                    p.AddressStreet,
-                    p.AddressHouseNumber,
-                    p.AddressAppartmentNumber,
-                    p.PhoneHome,
-                    p.PhoneWork
-                    );
-            }
-        }*/
-
         public static void UpdatePerson(
             Person toEdit,
             Storage db,
@@ -162,37 +127,6 @@ namespace Lab1
             person.Modify();
             MessageBox.Show("Запись изменена", "Сообщение", MessageBoxButtons.OK);
             db.Close();
-            /*if (dgv.SelectedRows.Count != 0)
-            {
-                Person person = new Person(
-                dgv.CurrentRow.Cells[0].Value.ToString(),
-                dgv.CurrentRow.Cells[1].Value.ToString(),
-                dgv.CurrentRow.Cells[2].Value.ToString(),
-                dgv.CurrentRow.Cells[3].Value.ToString(),
-                dgv.CurrentRow.Cells[4].Value.ToString(),
-                dgv.CurrentRow.Cells[7].Value.ToString(),
-                dgv.CurrentRow.Cells[8].Value.ToString(),
-                Convert.ToInt32(dgv.CurrentRow.Cells[5].Value),
-                Convert.ToInt32(dgv.CurrentRow.Cells[6].Value));
-                using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
-                {
-                    IObjectSet temp = db.QueryByExample(person);
-                    Person found = (Person)temp.Next();
-                    found.FirstName = toEdit.FirstName;
-                    found.MiddleName = toEdit.MiddleName;
-                    found.SecondName = toEdit.SecondName;
-                    found.AddressCity = toEdit.AddressCity;
-                    found.AddressStreet = toEdit.AddressStreet;
-                    found.AddressHouseNumber = toEdit.AddressHouseNumber;
-                    found.AddressAppartmentNumber = toEdit.AddressAppartmentNumber;
-                    found.PhoneHome = toEdit.PhoneHome;
-                    found.PhoneWork = toEdit.PhoneWork;
-                    db.Store(found);
-                    db.Close();
-                }
-                MessageBox.Show("Изменения сохранены!");
-            }
-            else MessageBox.Show("Запись не выбрана", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);*/
         }
 
         public static void DeletePerson(DataGridView dgv, Storage db)
@@ -209,31 +143,6 @@ namespace Lab1
             Root.index_Person.Remove(person);
             MessageBox.Show("Запись удалена!", "Сообщение", MessageBoxButtons.OK);
             db.Close();
-            /*Person personToDelete = new Person(
-                dgv.CurrentRow.Cells[0].Value.ToString(),
-                dgv.CurrentRow.Cells[1].Value.ToString(),
-                dgv.CurrentRow.Cells[2].Value.ToString(),
-                dgv.CurrentRow.Cells[3].Value.ToString(),
-                dgv.CurrentRow.Cells[4].Value.ToString(),
-                dgv.CurrentRow.Cells[7].Value.ToString(),
-                dgv.CurrentRow.Cells[8].Value.ToString(),
-                Convert.ToInt32(dgv.CurrentRow.Cells[5].Value),
-                Convert.ToInt32(dgv.CurrentRow.Cells[6].Value));
-                */
-
-            /*if (MessageBox.Show("ОПАСНА. ВЫ ХОТИТЕ УДАЛИТЬ ЗАПИСЬ?", "АХТУНГ", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK)
-            {
-                using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
-                {
-                    IObjectSet result = db.QueryByExample(personToDelete);
-                    foreach (Person p in result)
-                    {
-                        db.Delete(p);
-                    }
-                    db.Close();
-                }
-                MessageBox.Show("С удалением этой записи нить вашей судьбы обрывается. Загрузите предыдущий бекап базы данных дабы восстановаить течение судьбы, или живите дальше в проклятом мире, который сами и создали");
-            }*/
         }
     }
 }

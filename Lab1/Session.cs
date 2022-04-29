@@ -7,11 +7,13 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Db4objects.Db4o;
 using Db4objects.Db4o.Query;
+using Perst;
 
 namespace Lab1
 {
-    public class Session
+    public class Session : Persistent
     {
+        private int id;
         Commission commission;
         DateTime date;
         string place;
@@ -23,9 +25,11 @@ namespace Lab1
         public Session(
             Commission commission,
             DateTime date,
-            string place
+            string place,
+            int id
             )
         {
+            this.Id = id;
             this.Commission = commission;
             this.Date = date;
             this.Place = place;
@@ -33,106 +37,68 @@ namespace Lab1
 
         
 
-        private List<CommissionMember> sessionParticipants = new List<CommissionMember>();
-        public List<CommissionMember> SessionParticipants
+        private Link sessionParticipants;
+        public Link SessionParticipants
         {
             get => sessionParticipants;
             set => sessionParticipants = value;
         }
 
-        public static void addSession(Commission commission,DateTime date,string place) 
+        public int Id { get => id; set => id = value; }
+
+        private static int uniqueId(int id, MyRoot Root)
         {
-            using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
+            int unique = Root.index_session.Cast<Session>().Count(s => s.Id == id);
+            return unique;
+        }
+        public static void addSession(Commission commission,DateTime date,string place, int id, Storage db)
+        {
+            MyRoot Root = HelperDb<Session>.CreateRoot(db);
+            db.Open(Form1.dbName);
+            if (uniqueId(id, Root) != 0)
             {
-                IObjectSet commissionSet = db.QueryByExample(commission);
-                Commission resCommission = (Commission)commissionSet.Next();
-                Session session = new Session(resCommission, date, place);
-                db.Store(session);
-                db.Close();
+                id++;
             }
 
+            Session newSession = new Session(commission, date, place, id);
+            newSession.SessionParticipants = db.CreateLink();
+            Root.index_session.Put(newSession);
             MessageBox.Show("Запись о собрании успешно создана");
+            db.Close();
         }
 
-        public static void getSessions(DataGridView dgv, IObjectContainer db)
-        {
-            dgv.Rows.Clear();
-            if (dgv.Columns.Count == 0)
-            {
-                dgv.Columns.Add("sessionCommission", "Комиссия");
-                dgv.Columns.Add("sessionDate", "Дата собрания");
-                dgv.Columns.Add("sessionPlace", "Место проведения");
-            }
-
-            IQuery query = db.Query();
-            query.Constrain(typeof(Session));
-            IObjectSet sessions = query.Execute();
-            foreach (Session s in sessions)
-            {
-                dgv.Rows.Add(s.Commission.CommissionName, s.Date, s.Place);
-            }
-        }
-
-        public static void updateSession(DataGridView dgv, Session toEdit)
+        public static void updateSession(DataGridView dgv, Session toEdit, Storage db)
         {
             if (dgv.SelectedRows.Count != 0)
             {
-                Commission commissionProto = new Commission(dgv.CurrentRow.Cells[0].Value.ToString());
-                DateTime date = Convert.ToDateTime(dgv.CurrentRow.Cells[1].Value);
-                string place = dgv.CurrentRow.Cells[2].Value.ToString();
-                using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
-                {
-                    IObjectSet commissionSet = db.QueryByExample(commissionProto);
-                    Commission commissionRes = (Commission)commissionSet.Next();
-                    Session sessionProto = new Session(commissionRes, date, place);
-                    IObjectSet sessionSet = db.QueryByExample(sessionProto);
-                    Session sessionToEdit = (Session)sessionSet.Next();
-                    IObjectSet commissionToSet = db.QueryByExample(new Commission(toEdit.Commission.CommissionName));
-                    Commission resCommissionToSet = (Commission)commissionToSet.Next();
-                    sessionToEdit.Commission = resCommissionToSet;
-                    sessionToEdit.Date = toEdit.Date;
-                    sessionToEdit.Place = toEdit.Place;
-                    db.Store(sessionToEdit);
-                    db.Close();
-                }
-
+                MyRoot Root = HelperDb<Session>.CreateRoot(db);
+                db.Open(Form1.dbName);
+                Session sessionToEdit = (Session)Root.index_session[(int)dgv.CurrentRow.Cells[0].Value];
+                sessionToEdit.Commission = toEdit.Commission;
+                sessionToEdit.Date = toEdit.Date;
+                sessionToEdit.Place = toEdit.Place;
+                sessionToEdit.Modify();
+                db.Close();
                 MessageBox.Show("Изменения сохранены");
             }
             else MessageBox.Show("Запись не выбрана", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        public static void deleteSession(DataGridView dgv)
+        public static void deleteSession(DataGridView dgv, Storage db)
         {
-            if (MessageBox.Show("ОПАСНА. ВЫ ХОТИТЕ УДАЛИТЬ ЗАПИСЬ?", "АХТУНГ", MessageBoxButtons.OKCancel,
-                    MessageBoxIcon.Question) == DialogResult.OK)
+            int id = (int)dgv.CurrentRow.Cells[0].Value;
+            MyRoot Root = HelperDb<Session>.CreateRoot(db);
+            db.Open(Form1.dbName);
+            Session session = null;
+            foreach (Session s in Root.index_session.Cast<Session>().Where(s=>s.Id==id))
             {
-                Commission commissionProto = new Commission(dgv.CurrentRow.Cells[0].Value.ToString());
-                using (IObjectContainer db = Db4oEmbedded.OpenFile(Form1.dbName))
-                {
-                    IObjectSet commissionSet = db.QueryByExample(commissionProto);
-                    Commission commissionRes = (Commission)commissionSet.Next();
-                    Session sessionToDelete = new Session(commissionRes,
-                        Convert.ToDateTime(dgv.CurrentRow.Cells[1].Value), dgv.CurrentRow.Cells[2].Value.ToString());
-                    IObjectSet result = db.QueryByExample(sessionToDelete);
-                    foreach (Session s in result)
-                    {
-                        db.Delete(s);
-                    }
-
-                    db.Close();
-                }
-
-                MessageBox.Show(
-                    "С удалением этой записи нить вашей судьбы обрывается. Загрузите предыдущий бекап базы данных дабы восстановаить течение судьбы, или живите дальше в проклятом мире, который сами и создали");
+                session = s;
             }
-        }
 
-        public void addParticipant(IObjectContainer db, CommissionMember cm)
-        {
-            IObjectSet cmSet = db.QueryByExample(cm);
-            CommissionMember cmRes = (CommissionMember)cmSet.Next();
-            SessionParticipants.Add(cm);
-            MessageBox.Show(this.SessionParticipants[0].Person.SecondName);
+            Root.index_session.Remove(session);
+            Root.index_session.Modify();
+            MessageBox.Show("Запись удалена!", "Сообщение", MessageBoxButtons.OK);
+            db.Close();
         }
     }
 }

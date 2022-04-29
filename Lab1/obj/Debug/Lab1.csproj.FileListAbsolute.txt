@@ -46,3 +46,4 @@ C:\Users\innok\RiderProjects\csharpdb4o\Lab1\obj\Debug\Lab1.csproj.GenerateResou
 C:\Users\innok\RiderProjects\csharpdb4o\Lab1\obj\Debug\Lab1.csproj.CopyComplete
 C:\Users\innok\RiderProjects\csharpdb4o\Lab1\obj\Debug\Lab1.exe
 C:\Users\innok\RiderProjects\csharpdb4o\Lab1\obj\Debug\Lab1.pdb
+C:\Users\innok\RiderProjects\csharpdb4o\Lab1\bin\Debug\Perst.NET.dll
