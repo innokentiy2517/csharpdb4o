@@ -63,6 +63,7 @@ namespace Lab1
             Session newSession = new Session(commission, date, place, id);
             newSession.SessionParticipants = db.CreateLink();
             Root.index_session.Put(newSession);
+            Root.multiSession.Put(newSession);
             MessageBox.Show("Запись о собрании успешно создана");
             db.Close();
         }

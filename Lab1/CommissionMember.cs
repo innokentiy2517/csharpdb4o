@@ -77,6 +77,12 @@ namespace Lab1
             MyRoot Root = HelperDb<CommissionMember>.CreateRoot(db);
             db.Open(Form1.dbName);
             CommissionMember toEdit = (CommissionMember)Root.index_commissionMember[id];
+            if (toEdit.isChairman)
+            {
+                MessageBox.Show("Член комиссии уже является председателем");
+                db.Close();
+                return;
+            }
             toEdit.IsChairman = true;
             toEdit.chairStartDate = DateTime.Today.Date;
             toEdit.ChairEndDate = DateTime.MinValue.Date;
@@ -93,6 +99,7 @@ namespace Lab1
             if (!toEdit.IsChairman)
             {
                 MessageBox.Show("Член комиссии не является председателем");
+                db.Close();
                 return;
             }
             toEdit.IsChairman = false;
@@ -110,6 +117,7 @@ namespace Lab1
             if (toEdit.ExitDate != DateTime.MinValue)
             {
                 MessageBox.Show("Член комиссии уже не состоит в комисии");
+                db.Close();
                 return;
             }
             if (toEdit.ChairEndDate == DateTime.MinValue&&toEdit.IsChairman)

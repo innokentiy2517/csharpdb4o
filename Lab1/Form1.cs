@@ -141,6 +141,15 @@ namespace Lab1
 
         private void editPersonButton_Click(object sender, EventArgs e)
         {
+            dbHelper.db.Open(dbName);
+            List<Person> personSet = root.index_Person.Cast<Person>().Where(p =>
+                p.PhoneHome == phoneHomeTextBox.Text || p.PhoneWork == phoneWorkTextBox.Text).ToList();
+            dbHelper.db.Close();
+            if (personSet.Count > 0)
+            {
+                MessageBox.Show("Номера телефона должны быть уникальными");
+                return;
+            }
             Person edit = new Person(
                 firstName:firstNameTextBox.Text,
                 middleName:middleNameTextBox.Text,
@@ -173,7 +182,15 @@ namespace Lab1
 
         private void addPersonButton_Click(object sender, EventArgs e)
         {
-
+            dbHelper.db.Open(dbName);
+            List<Person> personSet = root.index_Person.Cast<Person>().Where(p =>
+                p.PhoneHome == phoneHomeTextBox.Text || p.PhoneWork == phoneWorkTextBox.Text).ToList();
+            dbHelper.db.Close();
+            if (personSet.Count > 0)
+            {
+                MessageBox.Show("Номера телефона должны быть уникальными");
+                return;
+            }
             Person.addPerson(
                 FirstName: firstNameTextBox.Text,
                 MiddleName: middleNameTextBox.Text,
@@ -207,6 +224,7 @@ namespace Lab1
 
         private void addCommissionButton_Click(object sender, EventArgs e)
         {
+            if (textBox1.Text.Length == 0) {MessageBox.Show("Название комиссии не должно быть пустым"); return;}
             string name = textBox1.Text;
             Commission.AddCommission(name,commissionGridView.Rows.Count,dbHelper.db);
             ReadF(commissionGridView, typeof(Commission));
@@ -214,6 +232,18 @@ namespace Lab1
 
         private void editCommissionButton_Click(object sender, EventArgs e)
         {
+            bool unique = true;
+            dbHelper.db.Open(dbName);
+            foreach (Commission c in dbHelper.Read(root.index_commission))
+            {
+                if (c.CommissionName == textBox1.Text) unique = false;
+            }
+            dbHelper.db.Close();
+            if (!unique)
+            {
+                MessageBox.Show("Комиссия с таким названием уже есть");
+                return;
+            }
             Commission edit = new Commission(textBox1.Text,0);
             Commission.UpdateCommission(edit, dbHelper.db,(int)commissionGridView.CurrentRow.Cells[0].Value);
             ReadF(commissionGridView, typeof(Commission));
@@ -283,7 +313,17 @@ namespace Lab1
             {
                 commission = c;
             }
+
+            List<CommissionMember> cmSet = root.index_commissionMember.Cast<CommissionMember>().Where(cm =>
+                cm.Person == person && cm.ExitDate == DateTime.MinValue).ToList();
             dbHelper.db.Close();
+            bool isBusy = cmSet.Count > 0;
+
+            if (isBusy)
+            {
+                MessageBox.Show("Данный член гордумы уже состоит в комиссии!");
+                return;
+            }
             CommissionMember.addCommissionMember(person, commission,commissionMemberDGV.Rows.Count, dbHelper.db);
             ReadF(commissionMemberDGV, typeof(CommissionMember));
         }
@@ -388,24 +428,69 @@ namespace Lab1
             MyRoot Root = HelperDb<Session>.CreateRoot(db);
             db.Open(dbName);
 
-            List<Session> session = Root.index_session.Cast<Session>()
-                .Where(s => s.Date >= dateFrom.Date&&s.Date<=dateTo.Date).ToList();
-            var sessionsGrouped = session.GroupBy(s => s.Commission.CommissionName, (ses) => new {Commission=ses.Commission.CommissionName,Place=ses.Place, Date=ses.Date});
+            /*List<Session> session = Root.index_session.Cast<Session>()
+                .Where(s => s.Date >= dateFrom.Date&&s.Date<=dateTo.Date).ToList();*/
+            List<Session> sessions = Root.multiSession
+                .Range(
+                    new Key(new object[] { dateFrom, "" }),
+                    new Key(new object[] { dateTo, "" }),
+                    IterationOrder.DescentOrder)
+                .Cast<Session>()
+                .ToList();
+            
             if (dgv.Columns.Count == 0)
             {
                 dgv.Columns.Add("CommissionName", "Комиссия");
                 dgv.Columns.Add("Place", "Место");
                 dgv.Columns.Add("Date", "Дата");
             }
-            foreach (var s in sessionsGrouped)
+
+            foreach (Session s in sessions)
             {
-                // dgv.Rows.Add(s.Commission, s.)
+                dgv.Rows.Add(s.Commission.CommissionName, s.Place, s.Date);
             }
+            db.Close();
         }
 
         private void indexQueryButton_Click(object sender, EventArgs e)
         {
             indexQuery(indexQueryDGV, dbHelper.db, fromDatePicker.Value, toDatePicker.Value);
+        }
+        
+        /*
+         * Вывести список действующих членов комиссий, которые имеют два пропуска собрания подряд.
+         */
+
+        private void JSQLQuery(DataGridView dgv, Storage db)
+        {
+            dgv.Rows.Clear();
+            // MyRoot Root = HelperDb<Session>.CreateRoot(db);
+            db.Open(dbName);
+            if (dgv.Columns.Count == 0)
+            {
+                dgv.Columns.Add("FIO", "ФИО");
+                dgv.Columns.Add("commission", "Название комиссии");
+            }
+            foreach (CommissionMember cm in root.index_commissionMember.Cast<CommissionMember>().Where(cm=>cm.ExitDate==DateTime.MinValue))
+            {
+                int missed = 0;
+                foreach (Session s in root.index_session.Cast<Session>().Where(ses=>!ses.SessionParticipants.Contains(cm)&&ses.Commission.Id==cm.Commission.Id))
+                {
+                    missed++;
+                }
+
+                if (missed >= 2)
+                {
+                    dgv.Rows.Add(cm.Person.SecondName + " " + cm.Person.FirstName + " " + cm.Person.MiddleName,
+                        cm.Commission.CommissionName);
+                }
+            }
+            db.Close();
+        }
+
+        private void JSQLQueryButton_Click(object sender, EventArgs e)
+        {
+            JSQLQuery(JSQLQueryGV,dbHelper.db);
         }
     }
 }

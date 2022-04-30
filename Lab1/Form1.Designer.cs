@@ -88,6 +88,9 @@
             this.toDatePicker = new System.Windows.Forms.DateTimePicker();
             this.fromDatePicker = new System.Windows.Forms.DateTimePicker();
             this.indexQueryDGV = new System.Windows.Forms.DataGridView();
+            this.tabPage6 = new System.Windows.Forms.TabPage();
+            this.JSQLQueryGV = new System.Windows.Forms.DataGridView();
+            this.JSQLQueryButton = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.commissionGridView)).BeginInit();
@@ -99,6 +102,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.sessionGV)).BeginInit();
             this.tabPage5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.indexQueryDGV)).BeginInit();
+            this.tabPage6.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.JSQLQueryGV)).BeginInit();
             this.SuspendLayout();
             // 
             // addCommissionButton
@@ -136,6 +141,7 @@
             this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Controls.Add(this.tabPage5);
+            this.tabControl1.Controls.Add(this.tabPage6);
             this.tabControl1.Location = new System.Drawing.Point(13, 14);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabControl1.Name = "tabControl1";
@@ -730,6 +736,37 @@
             this.indexQueryDGV.Size = new System.Drawing.Size(737, 254);
             this.indexQueryDGV.TabIndex = 0;
             // 
+            // tabPage6
+            // 
+            this.tabPage6.Controls.Add(this.JSQLQueryGV);
+            this.tabPage6.Controls.Add(this.JSQLQueryButton);
+            this.tabPage6.Location = new System.Drawing.Point(4, 25);
+            this.tabPage6.Name = "tabPage6";
+            this.tabPage6.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage6.Size = new System.Drawing.Size(749, 499);
+            this.tabPage6.TabIndex = 5;
+            this.tabPage6.Text = "JSQL_QUERY";
+            this.tabPage6.UseVisualStyleBackColor = true;
+            // 
+            // JSQLQueryGV
+            // 
+            this.JSQLQueryGV.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.JSQLQueryGV.Location = new System.Drawing.Point(6, 6);
+            this.JSQLQueryGV.Name = "JSQLQueryGV";
+            this.JSQLQueryGV.RowTemplate.Height = 24;
+            this.JSQLQueryGV.Size = new System.Drawing.Size(737, 222);
+            this.JSQLQueryGV.TabIndex = 1;
+            // 
+            // JSQLQueryButton
+            // 
+            this.JSQLQueryButton.Location = new System.Drawing.Point(6, 234);
+            this.JSQLQueryButton.Name = "JSQLQueryButton";
+            this.JSQLQueryButton.Size = new System.Drawing.Size(72, 28);
+            this.JSQLQueryButton.TabIndex = 0;
+            this.JSQLQueryButton.Text = "button1";
+            this.JSQLQueryButton.UseVisualStyleBackColor = true;
+            this.JSQLQueryButton.Click += new System.EventHandler(this.JSQLQueryButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -754,8 +791,14 @@
             ((System.ComponentModel.ISupportInitialize)(this.sessionGV)).EndInit();
             this.tabPage5.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.indexQueryDGV)).EndInit();
+            this.tabPage6.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.JSQLQueryGV)).EndInit();
             this.ResumeLayout(false);
         }
+
+        private System.Windows.Forms.TabPage tabPage6;
+        private System.Windows.Forms.Button JSQLQueryButton;
+        private System.Windows.Forms.DataGridView JSQLQueryGV;
 
         private System.Windows.Forms.DateTimePicker fromDatePicker;
         private System.Windows.Forms.DateTimePicker toDatePicker;
