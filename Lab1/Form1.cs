@@ -182,6 +182,16 @@ namespace Lab1
 
         private void addPersonButton_Click(object sender, EventArgs e)
         {
+            try
+            {
+                Convert.ToInt32(houseNumberTextBox.Text);
+                Convert.ToInt32(appartNumberTextBox.Text);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Номер дома и квартиры не должен содержать буквы");
+                return;
+            }
             dbHelper.db.Open(dbName);
             List<Person> personSet = root.index_Person.Cast<Person>().Where(p =>
                 p.PhoneHome == phoneHomeTextBox.Text || p.PhoneWork == phoneWorkTextBox.Text).ToList();
