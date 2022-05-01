@@ -77,6 +77,37 @@ namespace Lab1
 
         private void editPersonButton_Click(object sender, EventArgs e)
         {
+            try
+            {
+                Convert.ToInt32(houseNumberTextBox.Text);
+                Convert.ToInt32(appartNumberTextBox.Text);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Номер дома и квартиры не должен содержать буквы");
+                return;
+            }
+
+            
+            bool isPhoneUnique = true;
+            using (IObjectContainer db = Db4oEmbedded.OpenFile(dbName))
+            {
+                IQuery query = db.Query();
+                query.Constrain(typeof(Person));
+                IConstraint phoneHomeCons = query.Descend("phoneHome").Constrain(phoneHomeTextBox.Text);
+                query.Descend("phoneWork").Constrain(phoneWorkTextBox.Text).Or(phoneHomeCons);
+                IObjectSet persSet = query.Execute();
+                if (persSet.HasNext())
+                {
+                    isPhoneUnique = false;
+                }
+            }
+
+            if (!isPhoneUnique)
+            {
+                MessageBox.Show("Член Гордумы с таким номером телефона уже существует");
+                return;
+            }
             Person edit = new Person(
                 firstName:firstNameTextBox.Text,
                 middleName:middleNameTextBox.Text,
@@ -108,6 +139,37 @@ namespace Lab1
 
         private void addPersonButton_Click(object sender, EventArgs e)
         {
+            try
+            {
+                Convert.ToInt32(houseNumberTextBox.Text);
+                Convert.ToInt32(appartNumberTextBox.Text);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Номер дома и квартиры не должен содержать буквы");
+                return;
+            }
+
+            
+            bool isPhoneUnique = true;
+            using (IObjectContainer db = Db4oEmbedded.OpenFile(dbName))
+            {
+                IQuery query = db.Query();
+                query.Constrain(typeof(Person));
+                IConstraint phoneHomeCons = query.Descend("phoneHome").Constrain(phoneHomeTextBox.Text);
+                query.Descend("phoneWork").Constrain(phoneWorkTextBox.Text).Or(phoneHomeCons);
+                IObjectSet persSet = query.Execute();
+                if (persSet.HasNext())
+                {
+                    isPhoneUnique = false;
+                }
+            }
+
+            if (!isPhoneUnique)
+            {
+                MessageBox.Show("Член Гордумы с таким номером телефона уже существует");
+                return;
+            }
             Person.addPerson(
                 firstNameTextBox.Text,
                 middleNameTextBox.Text,
@@ -139,13 +201,51 @@ namespace Lab1
 
         private void addCommissionButton_Click(object sender, EventArgs e)
         {
+            if (textBox1.Text.Length == 0) {MessageBox.Show("Название комиссии не должно быть пустым"); return;}
+            
             string name = textBox1.Text;
+            bool isUnique = true;
+            using (IObjectContainer db = Db4oEmbedded.OpenFile(dbName))
+            {
+                IQuery query = db.Query();
+                query.Constrain(typeof(Commission));
+                query.Descend("_commissionName").Constrain(name);
+                IObjectSet commissionSet = query.Execute();
+                if (commissionSet.HasNext())
+                {
+                    isUnique = false;
+                }
+            }
+
+            if (!isUnique)
+            {
+                MessageBox.Show("Комиссия с таким названием уже есть");
+                return;
+            }
             Commission.AddCommission(name);
             refreshCommissionGV();
         }
 
         private void editCommissionButton_Click(object sender, EventArgs e)
         {
+            bool isUnique = true;
+            using (IObjectContainer db = Db4oEmbedded.OpenFile(dbName))
+            {
+                IQuery query = db.Query();
+                query.Constrain(typeof(Commission));
+                query.Descend("_commissionName").Constrain(textBox1.Text);
+                IObjectSet commissionSet = query.Execute();
+                if (commissionSet.HasNext())
+                {
+                    isUnique = false;
+                }
+            }
+
+            if (!isUnique)
+            {
+                MessageBox.Show("Комиссия с таким названием уже есть");
+                return;
+            }
             Commission edit = new Commission(textBox1.Text);
             Commission.UpdateCommission(commissionGridView, edit);
             refreshCommissionGV();

@@ -205,14 +205,12 @@ namespace Lab1
                     MessageBox.Show("Нельзя исключить из комиссии председателя");
                     return;
                 }
-                /*bool isChairman;
-                if (dgv.CurrentRow.Cells[4].Value.ToString() == "False")
+
+                if (dgv.CurrentRow.Cells[3].Value.ToString() != "")
                 {
-                    MessageBox.Show("Данный член комиссии не является председателем");
+                    MessageBox.Show("Член комиссии уже не состоит в комисии");
                     return;
                 }
-                else isChairman = true;*/
-
                 IObjectSet personSet = db.QueryByExample(personProto);
                 Person personRes = (Person)personSet.Next();
                 IObjectSet commissionSet = db.QueryByExample(commissionProto);
