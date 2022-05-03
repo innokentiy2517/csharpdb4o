@@ -1,10 +1,6 @@
 ﻿using Db4objects.Db4o;
 using Db4objects.Db4o.Query;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Lab1

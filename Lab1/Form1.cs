@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Db4objects.Db4o;
-using Db4objects.Db4o.Internal.Query;
 using Db4objects.Db4o.Query;
 
 namespace Lab1
@@ -419,7 +413,6 @@ namespace Lab1
             DateTime date = Convert.ToDateTime(sessionGV.CurrentRow.Cells[1].Value.ToString());
             string place = sessionGV.CurrentRow.Cells[2].Value.ToString();
             Commission commissionProto = new Commission(commissionName);
-            Form p;
             Session sessionProto;
             using (IObjectContainer db = Db4oEmbedded.OpenFile(dbName))
             {
@@ -429,7 +422,7 @@ namespace Lab1
                 IObjectSet sessionSet = db.QueryByExample(sessionProto);
                 db.Close();
             }
-            p = new Participants(sessionProto);
+            Form p = new Participants(sessionProto);
             p.Show();
         }
 
@@ -465,13 +458,37 @@ namespace Lab1
                     query.Descend("exitDate").Constrain(DateTime.MinValue);
                     IObjectSet cmSet = query.Execute();
                     int cmCount = 0;
-                    foreach (CommissionMember cm in cmSet)
+                    foreach (CommissionMember unused in cmSet)
                     {
                         cmCount++;
                     }
 
                     if (cmCount >= 10) continue;
                     request1GV.Rows.Add(com.CommissionName, cmCount);
+                }
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            nativeQueryGV.Rows.Clear();
+            using (IObjectContainer db = Db4oEmbedded.OpenFile(dbName))
+            {
+                IList<Session> sessions = db.Query<Session>(
+                    delegate(Session session)
+                    {
+                        return session.Date >= dateFromPicker.Value && session.Date <= dateToPicker.Value;
+                    });
+                if (nativeQueryGV.Columns.Count==0)
+                {
+                    nativeQueryGV.Columns.Add("CommissionName", "Комиссия");
+                    nativeQueryGV.Columns.Add("Place", "Место");
+                    nativeQueryGV.Columns.Add("Date", "Дата");
+                }
+
+                foreach (Session s in sessions)
+                {
+                    nativeQueryGV.Rows.Add(s.Commission.CommissionName, s.Place, s.Date);
                 }
             }
         }
