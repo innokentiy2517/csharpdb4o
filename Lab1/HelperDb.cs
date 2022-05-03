@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Db4objects.Db4o;
 using Perst;
 
 namespace Lab1

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Windows.Forms;
-using Db4objects.Db4o;
-using Db4objects.Db4o.Config;
-using Db4objects.Db4o.Query;
 
 namespace Lab1
 {

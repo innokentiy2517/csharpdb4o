@@ -1,15 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Db4objects.Db4o;
-using Db4objects.Db4o.Internal.Query;
-using Db4objects.Db4o.Query;
 using Perst;
 
 namespace Lab1
@@ -466,10 +458,6 @@ namespace Lab1
         {
             indexQuery(indexQueryDGV, dbHelper.db, fromDatePicker.Value, toDatePicker.Value);
         }
-        
-        /*
-         * Вывести список действующих членов комиссий, которые имеют два пропуска собрания подряд.
-         */
 
         private void JSQLQuery(DataGridView dgv, Storage db)
         {
