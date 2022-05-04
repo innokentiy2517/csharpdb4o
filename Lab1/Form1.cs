@@ -228,6 +228,18 @@ namespace Lab1
         {
             if (textBox1.Text.Length == 0) {MessageBox.Show("Название комиссии не должно быть пустым"); return;}
             string name = textBox1.Text;
+            bool unique = true;
+            dbHelper.db.Open(dbName);
+            foreach (Commission c in dbHelper.Read(root.index_commission))
+            {
+                if (c.CommissionName == textBox1.Text) unique = false;
+            }
+            dbHelper.db.Close();
+            if (!unique)
+            {
+                MessageBox.Show("Комиссия с таким названием уже есть");
+                return;
+            }
             Commission.AddCommission(name,commissionGridView.Rows.Count,dbHelper.db);
             ReadF(commissionGridView, typeof(Commission));
         }

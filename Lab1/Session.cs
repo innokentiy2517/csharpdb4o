@@ -68,11 +68,16 @@ namespace Lab1
             {
                 MyRoot Root = HelperDb<Session>.CreateRoot(db);
                 db.Open(Form1.dbName);
-                Session sessionToEdit = (Session)Root.index_session[(int)dgv.CurrentRow.Cells[0].Value];
-                sessionToEdit.Commission = toEdit.Commission;
-                sessionToEdit.Date = toEdit.Date;
-                sessionToEdit.Place = toEdit.Place;
-                sessionToEdit.Modify();
+                Session sessionToEdit1 = (Session)Root.index_session[(int)dgv.CurrentRow.Cells[0].Value];
+                Session sessionToEdit2 = (Session)Root.multiSession[(int)dgv.CurrentRow.Cells[0].Value];
+                sessionToEdit1.Commission = toEdit.Commission;
+                sessionToEdit1.Date = toEdit.Date;
+                sessionToEdit1.Place = toEdit.Place;
+                sessionToEdit2.Commission = toEdit.Commission;
+                sessionToEdit2.Date = toEdit.Date;
+                sessionToEdit2.Place = toEdit.Place;
+                sessionToEdit1.Modify();
+                sessionToEdit2.Modify();
                 db.Close();
                 MessageBox.Show("Изменения сохранены");
             }

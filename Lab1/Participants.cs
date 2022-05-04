@@ -114,6 +114,13 @@ namespace Lab1
             {
                 ses = s;
             }
+
+            if (ses.SessionParticipants.Contains(part))
+            {
+                MessageBox.Show("Данный участник уже участвует в собрании!");
+                Form1.dbHelper.db.Close();
+                return;
+            }
             ses.SessionParticipants.Add(part);
             ses.Modify();
             Form1.dbHelper.db.Close();

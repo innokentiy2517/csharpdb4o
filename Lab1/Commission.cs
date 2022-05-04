@@ -61,9 +61,9 @@ namespace Lab1
         }
 
         Root.index_commission.Remove(commission);
-        MessageBox.Show("Запись удалена!", "Сообщение", MessageBoxButtons.OK);
         db.Close();
-    }
+        MessageBox.Show("Запись удалена!", "Сообщение", MessageBoxButtons.OK);
+    }            
 
     private static int uniqueId(int id, MyRoot Root)
     {
